@@ -38,4 +38,46 @@ export default function Analyzer() {
         type="number"
         placeholder="Annual Revenue ($)"
         className="w-full p-2 border rounded"
-        onChange={(e) => handleChange('r
+        onChange={(e) => handleChange('revenue', e.target.value)}
+      />
+      <input
+        type="number"
+        placeholder="Net Profit ($)"
+        className="w-full p-2 border rounded"
+        onChange={(e) => handleChange('profit', e.target.value)}
+      />
+      <input
+        type="number"
+        placeholder="Asking Price ($)"
+        className="w-full p-2 border rounded"
+        onChange={(e) => handleChange('askingPrice', e.target.value)}
+      />
+      <input
+        type="number"
+        placeholder="Owner Salary Added Back ($)"
+        className="w-full p-2 border rounded"
+        onChange={(e) => handleChange('ownerSalary', e.target.value)}
+      />
+      <textarea
+        placeholder="Notes / Deal Details"
+        className="w-full p-2 border rounded"
+        onChange={(e) => handleChange('notes', e.target.value)}
+      />
+      <button
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        onClick={evaluateBusiness}
+      >
+        Evaluate
+      </button>
+
+      {result && (
+        <div className="bg-gray-100 p-4 rounded-lg text-gray-700 space-y-2">
+          <p><strong>ROI:</strong> {(result.roi * 100).toFixed(1)}%</p>
+          <p><strong>Payback Period:</strong> {result.payback.toFixed(1)} years</p>
+          <p><strong>SDE:</strong> ${result.sde.toLocaleString()}</p>
+          <p><strong>Recommendation:</strong> {result.recommendation}</p>
+        </div>
+      )}
+    </div>
+  );
+}
