@@ -1,5 +1,3 @@
-// Business Buy Analyzer MVP – With Landing Page + Deal Flow
-
 import { useState } from 'react';
 import jsPDF from 'jspdf';
 
