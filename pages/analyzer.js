@@ -101,6 +101,27 @@ export default function Analyzer() {
             <p className="font-semibold mb-2">Next Steps:</p>
             <ul className="list-disc list-inside space-y-1">
               {getSteps(result.recommendation).map((step, i) => <li key={i}>{step}</li>)}
+                                                   import jsPDF from "jspdf";
+
+const downloadPDF = () => {
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text("Business Deal Summary", 20, 20);
+  doc.setFontSize(12);
+  doc.text(`ROI: ${(result.roi * 100).toFixed(1)}%`, 20, 35);
+  doc.text(`Payback Period: ${result.payback.toFixed(1)} years`, 20, 45);
+  doc.text(`SDE: $${result.sde.toLocaleString()}`, 20, 55);
+  doc.text(`Recommendation: ${result.recommendation}`, 20, 65);
+  
+  const steps = getSteps(result.recommendation);
+  doc.text("Next Steps:", 20, 80);
+  steps.forEach((step, idx) => {
+    doc.text(`• ${step.replace(/✅|⚠️|❌/g, '')}`, 25, 90 + idx * 10);
+  });
+
+  doc.save("deal-summary.pdf");
+};
+
             </ul>
           </div>
         </div>
