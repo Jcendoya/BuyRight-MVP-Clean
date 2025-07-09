@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import jsPDF from 'jspdf';
 
-export default function BusinessBuyAnalyzer() {
-  const [step, setStep] = useState('landing');
+export default function Analyzer() {
+  const [step, setStep] = useState('form');
   const [businessData, setBusinessData] = useState({
     revenue: '',
     profit: '',
@@ -17,10 +17,11 @@ export default function BusinessBuyAnalyzer() {
   };
 
   const evaluateBusiness = () => {
-    const rev = parseFloat(businessData.revenue);
-    const prof = parseFloat(businessData.profit);
-    const price = parseFloat(businessData.askingPrice);
-    const sde = prof + parseFloat(businessData.ownerSalary);
+    const rev = parseFloat(businessData.revenue || 0);
+    const prof = parseFloat(businessData.profit || 0);
+    const price = parseFloat(businessData.askingPrice || 1);
+    const salary = parseFloat(businessData.ownerSalary || 0);
+    const sde = prof + salary;
     const roi = sde / price;
     const payback = price / sde;
 
@@ -55,105 +56,102 @@ export default function BusinessBuyAnalyzer() {
   const getSteps = (recommendation) => {
     if (recommendation === "Strong Buy" || recommendation === "Buy") {
       return [
-        "✅ Ask the seller for 3 years of P&Ls and tax returns.",
-        "✅ Understand how involved the current owner is day-to-day.",
-        "✅ Explore SBA loans, seller financing, or partner capital.",
-        "✅ Build a 12-month growth/ops plan — how will YOU improve this?",
-        "✅ Put together a summary to pitch to lenders or partners."
+        "✅ Ask for 3 years of P&Ls and tax returns.",
+        "✅ Confirm how involved the owner is daily.",
+        "✅ Explore SBA loan or seller financing.",
+        "✅ Create your 12-month growth plan.",
+        "✅ Build pitch for investors or lenders."
       ];
     } else if (recommendation === "Wait") {
       return [
-        "⚠️ Review the profit + salary details — is it padded?",
-        "⚠️ Ask if the seller will budge on price or financing.",
-        "⚠️ Consider why they’re selling and how competitive the market is.",
-        "⚠️ Look at comps — can this business grow or just survive?"
+        "⚠️ Review profit + salary accuracy.",
+        "⚠️ Try negotiating on price/terms.",
+        "⚠️ Ask why they’re selling.",
+        "⚠️ Check growth potential and local comps."
       ];
     } else {
       return [
-        "❌ Low earnings relative to price — bad ROI.",
-        "❌ Not ideal unless price is deeply reduced.",
-        "❌ Keep looking — the right one is out there."
+        "❌ ROI too low for asking price.",
+        "❌ Walk away unless price drops significantly.",
+        "❌ Likely not worth your time."
       ];
     }
   };
 
-  if (step === 'landing') {
-    return (
-      <div className="p-8 max-w-3xl mx-auto text-center space-y-6">
-        <h1 className="text-4xl font-bold">Know if it’s a good business deal — in 60 seconds.</h1>
-        <p className="text-lg text-gray-600">We help you instantly evaluate any service business. No spreadsheets. No stress. Just clarity.</p>
-        <Button onClick={() => setStep('form')}>Evaluate a Deal</Button>
-        <div className="mt-10 text-left space-y-4">
-          <h2 className="text-2xl font-semibold">How It Works</h2>
-          <ol className="list-decimal list-inside text-gray-700 space-y-2">
-            <li>Enter basic info: Revenue, profit, asking price, and owner salary.</li>
-            <li>Get ROI, payback time, and a recommendation.</li>
-            <li>Download your custom game plan with next steps.</li>
-          </ol>
+  return (
+    <div className="max-w-xl mx-auto p-6 space-y-6">
+      <h1 className="text-3xl font-bold text-center">Business Deal Analyzer</h1>
+
+      {step === 'form' && (
+        <div className="space-y-4">
+          <input
+            className="w-full border p-2 rounded"
+            placeholder="Annual Revenue ($)"
+            onChange={(e) => handleChange('revenue', e.target.value)}
+          />
+          <input
+            className="w-full border p-2 rounded"
+            placeholder="Net Profit ($)"
+            onChange={(e) => handleChange('profit', e.target.value)}
+          />
+          <input
+            className="w-full border p-2 rounded"
+            placeholder="Asking Price ($)"
+            onChange={(e) => handleChange('askingPrice', e.target.value)}
+          />
+          <input
+            className="w-full border p-2 rounded"
+            placeholder="Owner Salary Add-Back ($)"
+            onChange={(e) => handleChange('ownerSalary', e.target.value)}
+          />
+          <textarea
+            className="w-full border p-2 rounded"
+            placeholder="Notes / Deal Details"
+            onChange={(e) => handleChange('notes', e.target.value)}
+          />
+          <button
+            className="w-full bg-blue-600 text-white py-2 rounded"
+            onClick={evaluateBusiness}
+          >
+            Analyze Deal
+          </button>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  if (step === 'form') {
-    return (
-      <div className="p-6 max-w-xl mx-auto">
-        <Card>
-          <CardContent className="space-y-4">
-            <h2 className="text-xl font-bold">Business Deal Evaluator</h2>
-            <Input placeholder="Annual Revenue ($)" onChange={(e) => handleChange('revenue', e.target.value)} />
-            <Input placeholder="Net Profit ($)" onChange={(e) => handleChange('profit', e.target.value)} />
-            <Input placeholder="Asking Price ($)" onChange={(e) => handleChange('askingPrice', e.target.value)} />
-            <Input placeholder="Owner Salary Added Back ($)" onChange={(e) => handleChange('ownerSalary', e.target.value)} />
-            <Textarea placeholder="Notes / Deal Details" onChange={(e) => handleChange('notes', e.target.value)} />
-            <Button onClick={evaluateBusiness}>Evaluate</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+      {step === 'result' && result && (
+        <div className="space-y-4">
+          <div className="bg-gray-100 p-4 rounded">
+            <h2 className="text-xl font-semibold mb-2">Your Deal Summary</h2>
+            <p><strong>ROI:</strong> {(result.roi * 100).toFixed(1)}%</p>
+            <p><strong>Payback:</strong> {result.payback.toFixed(1)} years</p>
+            <p><strong>SDE:</strong> ${result.sde.toLocaleString()}</p>
+            <p><strong>Recommendation:</strong> {result.recommendation}</p>
+          </div>
 
-  if (step === 'result' && result) {
-    const { roi, payback, recommendation, sde } = result;
-    const score = (roi * 100).toFixed(1);
-    const pay = payback.toFixed(1);
+          <div className="bg-white p-4 shadow rounded">
+            <h3 className="font-semibold mb-2">Next Steps</h3>
+            <ul className="list-disc list-inside space-y-1">
+              {getSteps(result.recommendation).map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          </div>
 
-    let tone = "";
+          <button
+            className="w-full bg-green-600 text-white py-2 rounded"
+            onClick={downloadPDF}
+          >
+            Download Summary (PDF)
+          </button>
 
-    if (recommendation === "Strong Buy" || recommendation === "Buy") {
-      tone = `This is a strong opportunity. The asking price aligns well with its earnings. With an ROI of ${score}%, you're looking at a quick payback and a solid foundation to build from.`;
-    } else if (recommendation === "Wait") {
-      tone = `The numbers aren’t bad, but this might need negotiation or more clarity before moving forward. ROI is ${score}% and payback is ${pay} years.`;
-    } else {
-      tone = `With a low ROI and long payback timeline, this deal likely isn’t worth the risk — at least not at the current price.`;
-    }
-
-    return (
-      <div className="p-6 max-w-xl mx-auto space-y-6">
-        <h2 className="text-2xl font-bold">Your Deal Analysis</h2>
-        <p><strong>ROI:</strong> {score}%</p>
-        <p><strong>Payback Period:</strong> {pay} years</p>
-        <p><strong>SDE:</strong> ${sde.toLocaleString()}</p>
-        <p><strong>Recommendation:</strong> {recommendation}</p>
-
-        <div className="bg-gray-100 p-4 rounded-lg text-gray-700">
-          <p className="font-semibold mb-2">What this means:</p>
-          <p>{tone}</p>
+          <button
+            className="w-full bg-gray-500 text-white py-2 rounded"
+            onClick={() => setStep('form')}
+          >
+            Analyze Another Deal
+          </button>
         </div>
-
-        <div className="bg-white p-4 shadow-sm rounded-lg">
-          <p className="font-semibold mb-2">Here’s what to do next:</p>
-          <ul className="list-disc list-inside space-y-1">
-            {getSteps(recommendation).map((item, idx) => <li key={idx}>{item}</li>)}
-          </ul>
-        </div>
-
-        <Button onClick={downloadPDF}>Download Summary (PDF)</Button>
-        <Button onClick={() => setStep('form')}>Evaluate Another Deal</Button>
-      </div>
-    );
-  }
-
-  return null;
+      )}
+    </div>
+  );
 }
-
